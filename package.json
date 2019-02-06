@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
-    "dev-start": "npm-run-all lint build start",
+    "dev-start": "npm-run-all build start",
     "dev": "nodemon --exec npm run dev-start",
     "start": "node ./out/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
