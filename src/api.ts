@@ -1,11 +1,16 @@
 import bodyParser from "body-parser";
 import express from "express";
-import { ComponentRouter } from "./resources/components/componentRouter";
+import { IComponentRouter } from "./resources/components/IComponentRouter";
 import { WbsItemsRouter } from "./resources/wbsitems/wbsitemsRouter";
 
 export class Api {
+    componentRouter: IComponentRouter;
 
-    public static Start() {
+    constructor(componentRouter: IComponentRouter) {
+        this.componentRouter = componentRouter;
+    }
+
+    public Start() {
 
         const api = express();
 
@@ -18,8 +23,7 @@ export class Api {
         });
 
         // Components
-        let componentRouter = new ComponentRouter();
-        api.use("/api/components", componentRouter.Routes());
+        api.use("/api/components", this.componentRouter.Routes());
 
         // WBS Items
         let wbsItemsRouter = new WbsItemsRouter();

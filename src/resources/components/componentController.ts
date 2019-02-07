@@ -1,34 +1,57 @@
 import {Request, Response} from "express";
-import { ComponentRepository } from './componentRepository';
+import { IComponentRepository } from './IComponentRepository';
+import {IComponentController} from "./IComponentController";
 
-export class ComponentController {
+export class ComponentController implements IComponentController {
 
-    componentRepository: ComponentRepository;
+    componentRepository: IComponentRepository;
 
-    constructor() {
-        this.componentRepository = new ComponentRepository();
+    constructor(compRepo: IComponentRepository) {
+        this.componentRepository = compRepo;
     }
 
-    GetComponents(req: Request, res: Response) : Response {
-        let result = this.componentRepository.GetComponents();
-        if(result.err) {
-            res.status(404);
-            return res.send(result.err);
-        }
-        return res.json(result.data);
+    GetComponents(req: Request, res: Response) : Promise<Response> {
+        return new Promise<Response>((resolve, reject) => {
+            this.componentRepository.GetComponents()
+            .then((result) => {
+                if(result.err) {
+                    res.status(404);
+                    reject(res.send(result.err));
+                } else {
+                    resolve(res.json(result.data));
+                }
+            })
+            .catch((err) => {
+                res.status(500);
+                reject(res.send(err));
+        });
+
+        });
     }
 
-    GetComponentById(req: Request, res: Response) : Response {
-        let result = this.componentRepository.GetComponentById(req.params.id);
-        if(result.err) {
-            res.status(404);
-            return res.send(result.err);
-        }
-        return res.json(result.data);
+    GetComponentById(req: Request, res: Response) : Promise<Response> {
+        return new Promise<Response>((resolve, reject) => {
+            this.componentRepository.GetComponentById(req.params.id)
+            .then((result) => {
+                if(result.err) {
+                    console.log(result.err);
+                    res.status(404);
+                    reject(res.send(result.err));
+                } else {
+                    resolve(res.json(result.data));
+                }
+            })
+            .catch((err) => {
+                res.status(500);
+                reject(res.send(err));
+            
+            })
+
+        });
+
     }
 
-    AddComponent(req: Request, res: Response) : Response {
-
+    AddComponent(req: Request, res: Response) : Promise<Response> {
         let comp = {
             id: req.body.id,
             class: req.body.class,
@@ -36,22 +59,41 @@ export class ComponentController {
             desc: req.body.desc
         };
 
-        let result = this.componentRepository.AddComponent(comp);
-        if(result.err) {
-            res.status(404);
-            return res.send(result.err);
-        }
-        res.status(201);
-        return res.json(result.data);
+        return new Promise<Response>((resolve, reject) => {
+            this.componentRepository.AddComponent(comp)
+            .then((result) => {
+                if(result.err) {
+                    res.status(500);
+                    resolve(res.send(result.err));
+                } else {
+                res.status(201);
+                resolve(res.json(result.data));
+                }
+    
+            })
+            .catch((err) => {
+                res.status(500);
+                resolve(res.send(err));
+            })
+    
+        });
     }
 
-    DeleteComponent(req: Request, res: Response) : Response {
-        let result =  this.componentRepository.DeleteComponent(req.params.id);
-        if(result.err) {
-            res.status(404);
-            return res.send(result.err);
-        }
-
-        return res.sendStatus(200);
+    DeleteComponent(req: Request, res: Response) : Promise<Response> {
+        return new Promise<Response>((resolve, reject) => {
+            this.componentRepository.DeleteComponent(req.params.id)
+            .then((result) => {
+                if(result.err) {
+                    res.status(404);
+                    reject(res.send(result.err));
+                } else {
+                    resolve(res.sendStatus(200));
+                }
+            })
+            .catch((err) => {
+                res.status(500);
+                reject(res.send(err));
+            })
+        });
     }
-}
+} 
