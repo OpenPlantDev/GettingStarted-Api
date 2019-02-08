@@ -33,11 +33,11 @@ export class WbsItemsRouter {
 
     Routes() : Router {
 
-        this.router.get("/", (req, res) => {
+        this.router.get("/api/wbsitems", (req, res) => {
             return res.json(wbsItems);
         });
 
-        this.router.get("/:id", (req, res) => {
+        this.router.get("/api/wbsitems/:id", (req, res) => {
             const index = this.findWbsItem(req.params.id);
             if (index > -1) {
                 return res.json(wbsItems[index]);
@@ -45,7 +45,7 @@ export class WbsItemsRouter {
             return res.sendStatus(404);
         });
 
-        this.router.post("/", (req, res) => {
+        this.router.post("/api/wbsitems", (req, res) => {
             wbsItems.push({
                 id: req.body.id,
                 class: req.body.class,
@@ -55,7 +55,7 @@ export class WbsItemsRouter {
 
         });
 
-        this.router.delete("/:id", (req, res) => {
+        this.router.delete("/api/wbsitems/:id", (req, res) => {
             // return res.send(`should wbs item comp with id = ${req.params.id}`);
             const index = this.findWbsItem(req.params.id);
             if (index > -1) {

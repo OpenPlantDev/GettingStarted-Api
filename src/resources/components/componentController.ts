@@ -2,6 +2,11 @@ import {Request, Response} from "express";
 import { IComponentRepository } from './IComponentRepository';
 import {IComponentController} from "./IComponentController";
 
+// The job of the Controller is to parse the request and then to call the proper method on the given repository
+// Note that The ComponentRepository calls return Promise<IComponentRepositoryActionResult> because they are async due to reading/writing to db
+// The IComponentRepositoryActionResult is an object with an err property and a data property
+
+
 export class ComponentController implements IComponentController {
 
     componentRepository: IComponentRepository;
@@ -10,12 +15,13 @@ export class ComponentController implements IComponentController {
         this.componentRepository = compRepo;
     }
 
+
     GetComponents(req: Request, res: Response) : Promise<Response> {
         return new Promise<Response>((resolve, reject) => {
             this.componentRepository.GetComponents()
             .then((result) => {
                 if(result.err) {
-                    res.status(404);
+                    res.status(400);
                     reject(res.send(result.err));
                 } else {
                     resolve(res.json(result.data));

@@ -2,6 +2,8 @@ import {Router} from "express";
 import {IComponentController} from "./IComponentController";
 import {IComponentRouter} from "./IComponentRouter";
 
+// The job of the Router is to pass the given request to the proper method on the given controller
+// Note that The ComponentController calls return Promise<Response> because they are async due to reading/writing to db
 
 export class ComponentRouter implements IComponentRouter {
 
@@ -14,8 +16,8 @@ export class ComponentRouter implements IComponentRouter {
     }
 
     Routes() : Router {
-
-        this.router.get("/", (req, res) => {
+        // for a get request with route "/api/components" call the GetComponents method on the controller
+        this.router.get("/api/components", (req, res) => {
             this.componentController.GetComponents(req, res)
                 .then((result) => {
                     return result;
@@ -25,7 +27,8 @@ export class ComponentRouter implements IComponentRouter {
                 })
         });
 
-        this.router.get("/:id", (req, res) => {
+        // for a get request with route "/api/components/:id" call the GetComponentById method on the controller
+        this.router.get("/api/components/:id", (req, res) => {
             this.componentController.GetComponentById(req, res)
                 .then((result) => {
                     return result;
@@ -35,7 +38,8 @@ export class ComponentRouter implements IComponentRouter {
                 })
         });
 
-        this.router.post("/", (req, res) => {
+        // for a post request with route"/api/components" call the AddComponent method on the controller
+        this.router.post("/api/components", (req, res) => {
             this.componentController.AddComponent(req, res)
             .then((result) => {
                 return result;
@@ -45,7 +49,8 @@ export class ComponentRouter implements IComponentRouter {
             })
         });
 
-        this.router.delete("/:id", (req, res) => {
+        // for a delete request with route"/api/components/:id" call the DeleteComponent method on the controller
+        this.router.delete("/api/components/:id", (req, res) => {
             this.componentController.DeleteComponent(req, res)
             .then((result) => {
                 return result;
