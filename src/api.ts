@@ -23,11 +23,11 @@ export class Api {
         });
 
         // Components
-        api.use("/", this.componentRouter.Routes());
+        api.use("/api/components", this.componentRouter.Routes());
 
         // WBS Items
         let wbsItemsRouter = new WbsItemsRouter();
-        api.use("/", wbsItemsRouter.Routes());
+        api.use("/api/wbsitems", wbsItemsRouter.Routes());
 
 
         // Start the server
