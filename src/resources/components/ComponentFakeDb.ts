@@ -3,10 +3,40 @@ import {IComponentRepositoryActionResult, IComponentRepository} from "./ICompone
 import {Guid} from "guid-typescript";
 
 const components: Array<IComponent> = [
-    { id: "1", class: "valve", desc: "Gate Valve", name: "FV-100"},
-    { id: "2", class: "pump", desc: "Centrigual Pump", name: "FP-100"},
-    { id: "3", class: "tank", desc: "Horizontal Tank", name: "FT-100"},
-];
+    {
+        id: "1",
+        class: "valve",
+        name: "FV-100",
+        properties: [ { desc: 'Gate Valve' }, { length: 50 }, { weight: 100 } ],
+        graphics: [ 
+          {type: 0, start: {x: 25, y:10}, end: {x: 75, y:10}},
+          {type: 1, radius: 2, center: {x: 50, y:10}}
+        ]
+      },
+    
+      {
+        id: "2",
+        class: "pump",
+        name: "FP-100",
+        properties: [{desc:"Centrifugal Pump"}, {manufacturer: "ABC"}],
+        graphics: [ 
+          {type: 0, start: {x: 25, y:60}, end: {x: 75, y:60}},
+          {type: 1, radius: 2, center: {x: 50, y:60}}
+        ]
+      },
+    
+      {
+        id: "3",
+        class: "tank",
+        name: "FT-100",
+        properties: [{desc:"Horizontal Tank"},{manufacturer: "XYZ"}],
+        graphics: [ 
+          {type: 0, start: {x: 25, y:100}, end: {x: 75, y:100}},
+          {type: 1, radius: 2, center: {x: 50, y:100}}
+        ]
+      }
+    
+    ];
 
 export class ComponentFakeDb implements IComponentRepository {
 

@@ -53,10 +53,11 @@ export class ComponentController implements IComponentController {
 
     AddComponent(req: Request, res: Response) : Promise<Response> {
         let comp = {
-            id: req.body.id,
+            id: "",
             class: req.body.class,
             name: req.body.name,
-            desc: req.body.desc
+            properties: req.body.properties ? req.body.properties : "",
+            graphics: req.body.graphics ? req.body.graphics : ""
         };
 
         return new Promise<Response>((resolve, reject) => {
