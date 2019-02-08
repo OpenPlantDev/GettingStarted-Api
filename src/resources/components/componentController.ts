@@ -15,49 +15,41 @@ export class ComponentController implements IComponentController {
         this.componentRepository = compRepo;
     }
 
-
-    GetComponents(req: Request, res: Response) : Promise<Response> {
-        return new Promise<Response>((resolve, reject) => {
-            this.componentRepository.GetComponents()
-            .then((result) => {
-                if(result.err) {
-                    res.status(400);
-                    reject(res.send(result.err));
-                } else {
-                    resolve(res.json(result.data));
-                }
-            })
-            .catch((err) => {
-                res.status(500);
-                reject(res.send(err));
-        });
-
-        });
-    }
-
-    GetComponentById(req: Request, res: Response) : Promise<Response> {
-        return new Promise<Response>((resolve, reject) => {
-            this.componentRepository.GetComponentById(req.params.id)
-            .then((result) => {
-                if(result.err) {
-                    console.log(result.err);
-                    res.status(404);
-                    reject(res.send(result.err));
-                } else {
-                    resolve(res.json(result.data));
-                }
-            })
-            .catch((err) => {
-                res.status(500);
-                reject(res.send(err));
-            
-            })
-
-        });
+    async GetComponents(req: Request, res: Response) : Promise<Response> {
+        try {
+            const result = await this.componentRepository.GetComponents();
+            if(result.err) {
+                res.status(400);
+                return (res.send(result.err));
+            } else {
+                return(res.json(result.data));
+            }
+        }
+        catch(err) {
+            res.status(500);
+            return (res.send(err));
+        }
 
     }
 
-    AddComponent(req: Request, res: Response) : Promise<Response> {
+    async GetComponentById(req: Request, res: Response) : Promise<Response> {
+        try {
+            let result = await this.componentRepository.GetComponentById(req.params.id);
+            if(result.err) {
+                console.log(result.err);
+                res.status(404);
+                return(res.send(result.err));
+            } else {
+                return(res.json(result.data));
+            }
+        }
+        catch(err) {
+            res.status(500);
+            return(res.send(err));
+        }
+    }
+
+    async AddComponent(req: Request, res: Response) : Promise<Response> {
         let comp = {
             id: "",
             class: req.body.class,
@@ -66,41 +58,35 @@ export class ComponentController implements IComponentController {
             graphics: req.body.graphics ? req.body.graphics : ""
         };
 
-        return new Promise<Response>((resolve, reject) => {
-            this.componentRepository.AddComponent(comp)
-            .then((result) => {
-                if(result.err) {
-                    res.status(500);
-                    resolve(res.send(result.err));
-                } else {
-                res.status(201);
-                resolve(res.json(result.data));
-                }
-    
-            })
-            .catch((err) => {
+        try {
+            const result = await this.componentRepository.AddComponent(comp);
+            if(result.err) {
                 res.status(500);
-                resolve(res.send(err));
-            })
-    
-        });
+                return(res.send(result.err));
+            } else {
+            res.status(201);
+            return(res.json(result.data));
+            }
+        }
+        catch(err) {
+            res.status(500);
+            return(res.send(err));
+        }
     }
 
-    DeleteComponent(req: Request, res: Response) : Promise<Response> {
-        return new Promise<Response>((resolve, reject) => {
-            this.componentRepository.DeleteComponent(req.params.id)
-            .then((result) => {
-                if(result.err) {
-                    res.status(404);
-                    reject(res.send(result.err));
-                } else {
-                    resolve(res.sendStatus(200));
-                }
-            })
-            .catch((err) => {
-                res.status(500);
-                reject(res.send(err));
-            })
-        });
+    async DeleteComponent(req: Request, res: Response) : Promise<Response> {
+        try {
+            const result = await this.componentRepository.DeleteComponent(req.params.id);
+            if(result.err) {
+                res.status(404);
+                return(res.send(result.err));
+            } else {
+                return(res.sendStatus(200));
+            }
+        }
+        catch(err) {
+            res.status(500);
+            return(res.send(err));
+        }
     }
 } 
