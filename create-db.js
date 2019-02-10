@@ -17,7 +17,7 @@ const db = new sqlite3.Database(dbName);
 db.serialize(() => {
   // create a new database tables:
   db.run("CREATE TABLE components (id INTEGER PRIMARY KEY, class TEXT, name TEXT, properties TEXT, graphics TEXT)");
-  db.run("CREATE TABLE wbsitems (id INTEGER PRIMARY KEY, class TEXT, name TEXT)");
+  db.run("CREATE TABLE wbsitems (id INTEGER PRIMARY KEY, class TEXT, name TEXT, properties TEXT)");
 
   let valve = {
     class: "valve",
@@ -52,19 +52,24 @@ db.serialize(() => {
 
   // insert data into components table:
   db.run(`INSERT INTO components (class, name, properties, graphics)  VALUES 
-                      ('${valve.class}', '${alve.name}', '${JSON.stringify(valve.props)}', '${JSON.stringify(valve.graphics)}'),
+                      ('${valve.class}', '${valve.name}', '${JSON.stringify(valve.props)}', '${JSON.stringify(valve.graphics)}'),
                       ('${pump.class}', '${pump.name}', '${JSON.stringify(pump.props)}', '${JSON.stringify(pump.graphics)}'),
                       ('${tank.class}', '${tank.name}', '${JSON.stringify(tank.props)}', '${JSON.stringify(tank.graphics)}')
          `);
          
   console.log(`successfully created the components table in ${dbName}`);
 
+const u1 = { id: "1", class: "unit", name: "U1", properties: [{desc: "Unit #1"}] };
+const u2 = { id: "2", class: "unit", name: "U2", properties: [{desc: "Unit #2"}] };
+const s1 = { id: "3", class: "service", name: "S1", properties: [{desc: "Service #1"}] };
+const a1 = { id: "4", class: "area", name: "A1", properties: [{desc: "Area #1"}] };
+
   // insert data into wbsitems table:
-  db.run(`INSERT INTO wbsitems (class, name)  VALUES 
-                      ('unit', 'U1'),
-                      ('unit', 'U2'),
-                      ('service', 'S1'),
-                      ('area', 'A1')
+  db.run(`INSERT INTO wbsitems (class, name, properties)  VALUES 
+                      ('${u1.class}', '${u1.name}', '${JSON.stringify(u1.props)}'),
+                      ('${u2.class}', '${u2.name}', '${JSON.stringify(u2.props)}'),
+                      ('${s1.class}', '${s1.name}', '${JSON.stringify(s1.props)}'),
+                      ('${a1.class}', '${a1.name}', '${JSON.stringify(a1.props)}')
          `);
          
   console.log(`successfully created the wbsitems table in ${dbName}`);
@@ -83,9 +88,16 @@ db.serialize(() => {
 
   });
 
-  // db.each("SELECT * FROM wbsItems", (err, row) => {
-  //   console.log(row);
-  // });
+  db.each("SELECT * FROM wbsitems", (err, row) => {
+    let item = {
+      class: row.class,
+      name: row.name,
+      properties: row.properties ? JSON.parse(row.properties) : [],
+    };
+      console.log(`class=${item.class}, name=${item.name}, 
+                  properties=${JSON.stringify(item.properties)}`);
+
+  });
 });
 
 db.close();
