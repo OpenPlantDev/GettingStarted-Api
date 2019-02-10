@@ -1,13 +1,15 @@
 import bodyParser from "body-parser";
 import express from "express";
 import { IComponentRouter } from "./resources/components/ComponentRouter";
-import { WbsItemsRouter } from "./resources/wbsitems/wbsitemsRouter";
+import { IWbsItemRouter } from "./resources/wbsitems/WbsitemsRouter";
 
 export class Api {
     componentRouter: IComponentRouter;
+    wbsItemRouter: IWbsItemRouter
 
-    constructor(componentRouter: IComponentRouter) {
+    constructor(componentRouter: IComponentRouter, wbsItemRouter: IWbsItemRouter) {
         this.componentRouter = componentRouter;
+        this.wbsItemRouter = wbsItemRouter;
     }
 
     public Start() {
@@ -26,8 +28,7 @@ export class Api {
         api.use("/api/components", this.componentRouter.Routes());
 
         // WBS Items
-        let wbsItemsRouter = new WbsItemsRouter();
-        api.use("/api/wbsitems", wbsItemsRouter.Routes());
+        api.use("/api/wbsitems", this.wbsItemRouter.Routes());
 
 
         // Start the server

@@ -1,69 +1,69 @@
 import {Router} from "express";
+import {IWbsItemController} from "./WbsItemController";
 
-const wbsItems = [
-    { id: "1", class: "unit", name: "U1" },
-    { id: "2", class: "unit", name: "U2" },
-    { id: "3", class: "service", name: "S1" },
-    { id: "4", class: "area", name: "A1" },
+export interface IWbsItemRouter {
+    Routes: () => Router;
+}
 
-];
+// The job of the Router is to pass the given request to the proper method on the given controller
+// The routes in WbsItemRouter are relative to "/api/WbsItems" due to the way the router is used in api.ts:
+//      api.use("/api/wbsItems", this.WbsItemRouter.Routes());
+// so in the WbsItemRouter a route defined for "/:id" has a full route of "/api/wbsitem/:id"
+// Note that the WbsItemController calls return Promise<Response> because they are async due to reading/writing to db
 
-
-export class WbsItemsRouter {
+export class WbsItemRouter implements IWbsItemRouter {
 
     router: Router;
+    WbsItemController: IWbsItemController;
 
-    constructor() {
+    constructor(compController: IWbsItemController) {
         this.router = Router();
+        this.WbsItemController = compController;
     }
 
-    findWbsItem = (id: string) => {
-        let index = -1;
-        let currIndex = 0;
-        for ( const wbsItem of wbsItems) {
-            if (wbsItem.id === id) {
-                index = currIndex;
-                break;
-            }
-            currIndex++;
-        }
-        return index;
-    };
-
-
     Routes() : Router {
-
-        this.router.get("/", (req, res) => {
-            return res.json(wbsItems);
-        });
-
-        this.router.get("/:id", (req, res) => {
-            const index = this.findWbsItem(req.params.id);
-            if (index > -1) {
-                return res.json(wbsItems[index]);
+        // for a get request with route "/api/WbsItems" call the GetWbsItems method on the controller
+        this.router.get("/", async (req, res) => {
+            try {
+                const result = await this.WbsItemController.GetItems(req, res);
+                return result;
             }
-            return res.sendStatus(404);
-        });
-
-        this.router.post("/", (req, res) => {
-            wbsItems.push({
-                id: req.body.id,
-                class: req.body.class,
-                name: req.body.name
-            });
-            return res.sendStatus(201);
-
-        });
-
-        this.router.delete("/:id", (req, res) => {
-            // return res.send(`should wbs item comp with id = ${req.params.id}`);
-            const index = this.findWbsItem(req.params.id);
-            if (index > -1) {
-                wbsItems.splice(index, 1);
-                return res.sendStatus(200);
+            catch(err) {
+                throw err;
             }
-            return res.sendStatus(404);
+        });
 
+        // for a get request with route "/api/WbsItems/:id" call the GetWbsItemById method on the controller
+        this.router.get("/:id", async (req, res) => {
+            try {
+                const result = this.WbsItemController.GetItemById(req, res);
+                return result;
+            }
+            catch(err) {
+                throw err;
+            }
+        });
+
+        // for a post request with route"/api/WbsItems" call the AddWbsItem method on the controller
+        this.router.post("/", async (req, res) => {
+            try {
+                const result = this.WbsItemController.AddItem(req, res);
+                return result;
+            }
+            catch(err) {
+                return err;
+            }
+        });
+
+        // for a delete request with route"/api/WbsItems/:id" call the DeleteWbsItem method on the controller
+        this.router.delete("/:id", async (req, res) => {
+            try {
+                const result = this.WbsItemController.DeleteItem(req, res);
+                return result;
+            }
+            catch(err) {
+                return err;
+            }
         });
 
 
