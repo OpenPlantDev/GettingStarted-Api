@@ -1,9 +1,8 @@
-export interface IProperty {
-    [key: string]: any;
+export interface IComponentId {
+    id: string;
 }
 
-export interface IComponent {
-    id: string,
+export interface IComponent extends IComponentId {
     class: string,
     name: string
     properties: any,

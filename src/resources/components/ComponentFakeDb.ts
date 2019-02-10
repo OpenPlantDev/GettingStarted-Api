@@ -1,6 +1,9 @@
-import {IComponent} from "./IComponent";
-import {IComponentRepositoryActionResult, IComponentRepository} from "./IComponentRepository";
 import {Guid} from "guid-typescript";
+import {IComponent} from "./IComponent";
+import {IComponentRepositoryGetActionResult, 
+        IComponentRepositoryAddActionResult,
+        IComponentRepositoryDeleteActionResult,
+        IComponentRepository} from "./IComponentRepository";
 
 const components: Array<IComponent> = [
     {
@@ -43,15 +46,15 @@ export class ComponentFakeDb implements IComponentRepository {
     constructor() {
     }
 
-    GetComponents() : Promise<IComponentRepositoryActionResult> {
-        return new Promise<IComponentRepositoryActionResult>((resolve) => {
+    GetComponents() : Promise<IComponentRepositoryGetActionResult> {
+        return new Promise<IComponentRepositoryGetActionResult>((resolve) => {
             resolve({err: undefined, data: components});
 
         });
     }
 
-    GetComponentById(id: string) : Promise<IComponentRepositoryActionResult> {
-        return new Promise<IComponentRepositoryActionResult>((resolve, reject) => {
+    GetComponentById(id: string) : Promise<IComponentRepositoryGetActionResult> {
+        return new Promise<IComponentRepositoryGetActionResult>((resolve, reject) => {
             let comp = components.find((comp) => comp.id === id);
             if (comp) {
                 resolve({err: undefined, data: comp});
@@ -62,16 +65,16 @@ export class ComponentFakeDb implements IComponentRepository {
         });
     }
 
-    AddComponent(comp: IComponent) : Promise<IComponentRepositoryActionResult> {
+    AddComponent(comp: IComponent) : Promise<IComponentRepositoryAddActionResult> {
 
-        return new Promise<IComponentRepositoryActionResult> ((resolve, reject) => {
+        return new Promise<IComponentRepositoryAddActionResult> ((resolve, reject) => {
             comp.class = comp.class ? comp.class.trim() : "";
             comp.name = comp.name ? comp.name.trim() : "";
 
             if(comp.class.length == 0) {
-                resolve({ err: "class not defined", data: undefined });
+                resolve({ err: "class not defined", data: {id: comp.id} });
             } else if(comp.name.length == 0) {
-                resolve({ err: "name not defined", data: undefined });
+                resolve({ err: "name not defined", data: {id: comp.id} });
             } else {
                 comp.id = Guid.create().toString();
                 components.push(comp);
@@ -81,14 +84,14 @@ export class ComponentFakeDb implements IComponentRepository {
         });
     }
 
-    DeleteComponent(id: string) : Promise<IComponentRepositoryActionResult> {
-        return new Promise<IComponentRepositoryActionResult>((resolve, reject) => {
+    DeleteComponent(id: string) : Promise<IComponentRepositoryDeleteActionResult> {
+        return new Promise<IComponentRepositoryDeleteActionResult>((resolve, reject) => {
             const index = components.findIndex((comp) => comp.id === id);
             if (index < 0) {
-                resolve({err: `Component with id [${id}] was not found`, data: undefined});
+                resolve({err: `Component with id [${id}] was not found`});
             } else {
                 components.splice(index, 1);
-                resolve({err: undefined, data: undefined});
+                resolve({err: undefined});
             }
 
         });

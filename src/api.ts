@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
-import { IComponentRouter } from "./resources/components/IComponentRouter";
+import { IComponentRouter } from "./resources/components/ComponentRouter";
 import { WbsItemsRouter } from "./resources/wbsitems/wbsitemsRouter";
 
 export class Api {

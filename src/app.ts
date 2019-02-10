@@ -2,8 +2,8 @@ import {Api} from "./api";
 import sqlite3 from "sqlite3";
 
 
-import {IComponentRouter} from "./resources/components/IComponentRouter";
-import {IComponentController} from "./resources/components/IComponentController";
+import {IComponentRouter} from "./resources/components/ComponentRouter";
+import {IComponentController} from "./resources/components/ComponentController";
 import {IComponentRepository} from "./resources/components/IComponentRepository";
 
 import {ComponentRouter} from "./resources/components/ComponentRouter";

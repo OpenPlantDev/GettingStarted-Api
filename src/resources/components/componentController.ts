@@ -1,11 +1,18 @@
 import {Request, Response} from "express";
 import { IComponentRepository } from './IComponentRepository';
-import {IComponentController} from "./IComponentController";
+import { QueryOptions } from "../../services/QueryOptions.service";
 
+
+export interface IComponentController {
+    GetComponents : (req: Request, res: Response) => Promise<Response>;
+    GetComponentById : (req: Request, res: Response) => Promise<Response>;
+    AddComponent : (req: Request, res: Response) => Promise<Response>;
+    DeleteComponent : (req: Request, res: Response) => Promise<Response>;
+
+}
 // The job of the Controller is to parse the request and then to call the proper method on the given repository
 // Note that The ComponentRepository calls return Promise<IComponentRepositoryActionResult> because they are async due to reading/writing to db
 // The IComponentRepositoryActionResult is an object with an err property and a data property
-
 
 export class ComponentController implements IComponentController {
 
@@ -17,7 +24,7 @@ export class ComponentController implements IComponentController {
 
     async GetComponents(req: Request, res: Response) : Promise<Response> {
         try {
-            const result = await this.componentRepository.GetComponents();
+            const result = await this.componentRepository.GetComponents(QueryOptions.get(req.query));
             if(result.err) {
                 res.status(400);
                 return (res.send(result.err));
@@ -65,6 +72,7 @@ export class ComponentController implements IComponentController {
                 return(res.send(result.err));
             } else {
             res.status(201);
+            res.location(`${req.baseUrl}/${result.data.id}`)
             return(res.json(result.data));
             }
         }

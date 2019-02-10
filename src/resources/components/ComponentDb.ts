@@ -1,8 +1,14 @@
 import sqlite3 from "sqlite3";
+import {SqliteService} from "../../services/Sqlite.service";
 import {IComponent} from "./IComponent";
-import {IComponentRepositoryActionResult, IComponentRepositoryQueryOptions, IComponentRepository} from "./IComponentRepository";
+import {IComponentRepositoryGetActionResult, 
+        IComponentRepositoryAddActionResult,
+        IComponentRepositoryDeleteActionResult,
+        IComponentRepository} from "./IComponentRepository";
+import { IQueryOptions } from "../../services/QueryOptions.service";
 
 
+const tableName = "components";
 
 const rowToComp = (row: any) : IComponent => {
     return {
@@ -12,7 +18,6 @@ const rowToComp = (row: any) : IComponent => {
         properties: row.properties ? JSON.parse(row.properties) : [],
         graphics: row.graphics ? JSON.parse(row.graphics) : []
     }
-
 }
 
 const rowsToCompArray = (rows: Array<any>) : Array<IComponent> => {
@@ -33,104 +38,74 @@ const rowsToCompArray = (rows: Array<any>) : Array<IComponent> => {
 
 export class ComponentDb implements IComponentRepository {
 
-    db: sqlite3.Database;
+    sqliteService: SqliteService;
     constructor(db: sqlite3.Database) {
-        this.db = db;
+        this.sqliteService = new SqliteService(db);
     }
 
-    GetComponents(options?: IComponentRepositoryQueryOptions) : Promise<IComponentRepositoryActionResult> {
-        let whereClause = "";
-        if(options) {
-            if(options.filter) {
-                whereClause = `Where ${options.filter}`;
-            }
-            if(options.limit) {
-                whereClause = `${whereClause} Limit ${options.limit}`
+    async GetComponents(options?: IQueryOptions) : Promise<IComponentRepositoryGetActionResult> {
+        const query = this.sqliteService.getQuery(tableName, options ? options : {});
+        console.log(`query = ${query}`);
+        try {
+            let rows = await this.sqliteService.dbAll(query, []);
+            return({err: undefined, data: rowsToCompArray(rows)});
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    async GetComponentById(id: string) : Promise<IComponentRepositoryGetActionResult> {
+        const query = `Select * from components where id=${id}`;
+        try {
+            let rows = await this.sqliteService.dbAll(query, []);
+            if(rows.length <= 0) {
+                return({err: `Component with id [${id}] was not found`, data: undefined});
+            } else {
+                return({err: undefined, data: rowToComp(rows[0])});
             }
         }
-        const query = `Select * from components ${whereClause}`;
-        console.log(`query = ${query}`);
-        return new Promise<IComponentRepositoryActionResult>((resolve, reject) => {
-            this.db.all(query, [], (err, rows) => {
-                if(err) {
-                    console.log(`error running query = ${query}`);
-                    console.log(err);
-                    reject(err);
-                } else {
-                    resolve({err: undefined, data: rowsToCompArray(rows)});
-                }
-
-            });
-    
-        });
-
+        catch (err) {
+            throw err;
+        }
     }
 
-    GetComponentById(id: string) : Promise<IComponentRepositoryActionResult> {
-        return new Promise<IComponentRepositoryActionResult>((resolve, reject) => {
-            const query = `Select * from components where id=${id}`;
-
-            this.db.all(query, [], (err, rows) => {
-                if(err) {
-                    console.log(`error running query = ${query}`);
-                    console.log(err);
-                    reject(err);
-                } else {
-                    if(rows.length <= 0) {
-                        resolve({err: `Component with id [${id}] was not found`, data: undefined});
-                    } else {
-                        resolve({err: undefined, data: rowToComp(rows[0])});
-                    }
-                }
-
-            });
-        });
-    }
-
-    AddComponent(comp: IComponent) : Promise<IComponentRepositoryActionResult> {
+    async AddComponent(comp: IComponent) : Promise<IComponentRepositoryAddActionResult> {
         const compClass = comp.class ? comp.class.trim() : "";
         const compName = comp.name ? comp.name.trim() : "";
         const compProps = comp.properties ? JSON.stringify(comp.properties) : "";
         const compGraphics = comp.graphics ? JSON.stringify(comp.graphics) : "";
-        return new Promise<IComponentRepositoryActionResult>((resolve, reject) => {
-            if(compClass.length == 0) {
-                resolve({ err: "class not defined", data: undefined });
-            } else if(compName.length == 0) {
-                resolve({ err: "name not defined", data: undefined });
-            } else {
-                const query = `Insert into components (class, name, properties, graphics) Values
-                                ('${compClass}', '${compName}', '${compProps}', '${compGraphics}')`;
+        if(compClass.length == 0) {
+            return({ err: "class not defined", data: {id: ""} });
+        } else if(compName.length == 0) {
+            return({ err: "name not defined", data: {id: ""} });
+        } else {
+            const query = `Insert into components (class, name, properties, graphics) Values
+                            ('${compClass}', '${compName}', '${compProps}', '${compGraphics}')`;
+            try {
+                let result = await this.sqliteService.dbRun(query, []);
+                return({err: undefined, data: {id: result.lastId}});
 
-                this.db.run(query, [], (err) => {
-                    if(err) {
-                        console.log(`error running query = ${query}`);
-                        console.log(err);
-                        reject(err);
-                    } else {
-                        resolve({err: undefined, data: undefined});
-                    }
-    
-                });
-    
             }
-        });
+            catch (err) {
+                throw err;
+            }
+        }
     }
 
-    DeleteComponent(id: string) : Promise<IComponentRepositoryActionResult> {
-        return new Promise<IComponentRepositoryActionResult>((resolve, reject) => {
-            const query = `Delete from components where id=${id}`;
-
-            this.db.run(query, [], (err) => {
-                if(err) {
-                    console.log(`error running query = ${query}`);
-                    console.log(err);
-                    reject(err);
-                } else {
-                    resolve({err: undefined, data: undefined});
-                }
-
-            });
-        });
+    async DeleteComponent(id: string) : Promise<IComponentRepositoryDeleteActionResult> {
+        const query = `Delete from components where id=${id}`;
+        try {
+            let result = await this.sqliteService.dbRun(query, []);
+            if(result.rowsAffected == 0) {
+                return {err: `Component with id [${id}] was not found`};
+            } else {
+                return {err: undefined};
+            }
+        }
+        catch (err) {
+            throw err;
+        }
     }
 
 }
